@@ -18,18 +18,12 @@
 package de.siphalor.mousewheelie.client.network;
 
 import com.mojang.logging.LogUtils;
-import de.siphalor.mousewheelie.client.MWClient;
 import lombok.CustomLog;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
-import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
@@ -152,19 +146,6 @@ public class InteractionManager {
 		@Override
 		public boolean trigger(TriggerType triggerType) {
 			return triggerType == TriggerType.GUI_CONFIRM && --triggers == 0;
-		}
-	}
-
-	public static class SlotUpdateWaiter implements Waiter {
-		int triggers;
-
-		public SlotUpdateWaiter(int triggers) {
-			this.triggers = triggers;
-		}
-
-		@Override
-		public boolean trigger(TriggerType triggerType) {
-			return triggerType == TriggerType.CONTAINER_SLOT_UPDATE && --triggers == 0;
 		}
 	}
 

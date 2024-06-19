@@ -49,9 +49,6 @@ public class MWConfig {
 		)
 		public int integratedInteractionRate = 1;
 
-		@AConfigEntry(comment = "Whether item types should check nbt data.\nThis is for example used by scrolling and drop-clicking.\nNONE disables this, ALL checks for exactly the same nbt and SOME allows for differences in damage and enchantments.")
-		public ItemStackUtils.NbtMatchMode itemKindsNbtMatchMode = ItemStackUtils.NbtMatchMode.SOME;
-
 		public enum HotbarScoping {HARD, SOFT, NONE}
 
 		public HotbarScoping hotbarScoping = HotbarScoping.SOFT;
@@ -78,7 +75,6 @@ public class MWConfig {
 		public SortMode primarySort = SortMode.CREATIVE;
 		public SortMode shiftSort = SortMode.QUANTITY;
 		public SortMode controlSort = SortMode.ALPHABET;
-		public boolean serverAcceleratedSorting = true;
 
 		@AConfigEntry(scope = ConfigScope.SMALLEST)
 		public boolean optimizeCreativeSearchSort = true;

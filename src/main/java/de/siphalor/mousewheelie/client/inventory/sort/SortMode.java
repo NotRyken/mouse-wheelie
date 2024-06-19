@@ -109,12 +109,12 @@ public abstract class SortMode implements DropdownMaterial<SortMode> {
 				}
 
 				IntArrays.quickSort(sortIds, (a, b) -> {
-					if (strings[a].equals("")) {
-						if (strings[b].equals(""))
+					if (strings[a].isEmpty()) {
+						if (strings[b].isEmpty())
 							return 0;
 						return 1;
 					}
-					if (strings[b].equals("")) return -1;
+					if (strings[b].isEmpty()) return -1;
 					int comp = strings[a].compareToIgnoreCase(strings[b]);
 					if (comp == 0) {
 						return ItemStackUtils.compareEqualItems(stacks[a], stacks[b]);

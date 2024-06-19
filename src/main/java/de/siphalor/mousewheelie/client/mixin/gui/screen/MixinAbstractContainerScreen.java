@@ -49,9 +49,6 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 	}
 
 	@Shadow
-	protected abstract Slot getSlotAt(double double_1, double double_2);
-
-	@Shadow
 	protected abstract void onMouseClick(Slot slot_1, int int_1, int int_2, SlotActionType slotActionType_1);
 
 	@Shadow
