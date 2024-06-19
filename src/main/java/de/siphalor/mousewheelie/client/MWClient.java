@@ -17,8 +17,9 @@
 
 package de.siphalor.mousewheelie.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
-import de.siphalor.mousewheelie.client.mixin.KeyBindingAccessor;
+import de.siphalor.mousewheelie.client.mixin.KeyMappingAccessor;
 import de.siphalor.mousewheelie.client.util.CreativeSearchOrder;
 import de.siphalor.mousewheelie.client.util.inject.IContainerScreen;
 import net.fabricmc.api.ClientModInitializer;
@@ -27,17 +28,16 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("WeakerAccess")
 public class MWClient implements ClientModInitializer {
-	private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
+	private static final Minecraft CLIENT = Minecraft.getInstance();
 
-	public static final KeyBinding SORT_KEY_BINDING = new KeyBinding(
-			"sort_inventory", InputUtil.Type.MOUSE, 2, "mw_category");
+	public static final KeyMapping SORT_KEY_BINDING = new KeyMapping(
+			"sort_inventory", InputConstants.Type.MOUSE, 2, "mw_category");
 
 	public static int lastUpdatedSlot = -1;
 
@@ -53,11 +53,11 @@ public class MWClient implements ClientModInitializer {
 		});
 	}
 
-	public void onEndTick(MinecraftClient mc) {
+	public void onEndTick(Minecraft mc) {
 		if (cooldown == 0) {
-			if (InputUtil.isKeyPressed(mc.getWindow().getHandle(),
-					((KeyBindingAccessor)SORT_KEY_BINDING).getBoundKey().getCode())) {
-				if (mc.currentScreen instanceof IContainerScreen screen) {
+			if (InputConstants.isKeyDown(mc.getWindow().getWindow(),
+					((KeyMappingAccessor)SORT_KEY_BINDING).getKey().getValue())) {
+				if (mc.screen instanceof IContainerScreen screen) {
 					LogUtils.getLogger().info("good screen");
 					screen.mouseWheelie_triggerSort();
 					cooldown = 11;
@@ -68,6 +68,6 @@ public class MWClient implements ClientModInitializer {
 	}
 
 	public static boolean isOnLocalServer() {
-		return CLIENT.getServer() != null;
+		return CLIENT.getSingleplayerServer() != null;
 	}
 }

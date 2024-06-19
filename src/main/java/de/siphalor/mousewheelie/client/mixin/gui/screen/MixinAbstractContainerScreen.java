@@ -25,14 +25,6 @@ import de.siphalor.mousewheelie.client.inventory.sort.SortMode;
 import de.siphalor.mousewheelie.client.network.InteractionManager;
 import de.siphalor.mousewheelie.client.util.inject.IContainerScreen;
 import de.siphalor.mousewheelie.client.util.inject.ISlot;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,29 +32,37 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.function.Supplier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 
 @SuppressWarnings("WeakerAccess")
-@Mixin(HandledScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public abstract class MixinAbstractContainerScreen extends Screen implements IContainerScreen {
-	protected MixinAbstractContainerScreen(Text textComponent_1) {
+	protected MixinAbstractContainerScreen(Component textComponent_1) {
 		super(textComponent_1);
 	}
 
 	@Shadow
-	protected abstract void onMouseClick(Slot slot_1, int int_1, int int_2, SlotActionType slotActionType_1);
+	protected abstract void slotClicked(Slot slot_1, int int_1, int int_2, ClickType slotActionType_1);
 
 	@Shadow
 	@Final
-	protected ScreenHandler handler;
+	protected AbstractContainerMenu menu;
 
 	@Shadow
-	protected Slot focusedSlot;
+	protected Slot hoveredSlot;
 
 	@SuppressWarnings({"ConstantConditions", "unchecked"})
 	@Unique
-	private final Supplier<ContainerScreenHelper<HandledScreen<ScreenHandler>>> screenHelper = Suppliers.memoize(
-			() -> ContainerScreenHelper.of((HandledScreen<ScreenHandler>) (Object) this, (slot, data, slotActionType) -> new InteractionManager.CallbackEvent(() -> {
-				onMouseClick(slot, ((ISlot) slot).mouseWheelie_getIdInContainer(), data, slotActionType);
+	private final Supplier<ContainerScreenHelper<AbstractContainerScreen<AbstractContainerMenu>>> screenHelper = Suppliers.memoize(
+			() -> ContainerScreenHelper.of((AbstractContainerScreen<AbstractContainerMenu>) (Object) this, (slot, data, slotActionType) -> new InteractionManager.CallbackEvent(() -> {
+				slotClicked(slot, ((ISlot) slot).mouseWheelie_getIdInContainer(), data, slotActionType);
 				return InteractionManager.TICK_WAITER;
 			}, true))
 	);
@@ -70,14 +70,14 @@ public abstract class MixinAbstractContainerScreen extends Screen implements ICo
 	@SuppressWarnings("ConstantConditions")
 	@Override
 	public boolean mouseWheelie_triggerSort() {
-		if (focusedSlot == null)
+		if (hoveredSlot == null)
 			return false;
-		PlayerEntity player = MinecraftClient.getInstance().player;
-		if (player.getAbilities().creativeMode
-				&& GLFW.glfwGetMouseButton(client.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE) != 0
-				&& (!focusedSlot.getStack().isEmpty() == handler.getCursorStack().isEmpty()))
+		Player player = Minecraft.getInstance().player;
+		if (player.getAbilities().instabuild
+				&& GLFW.glfwGetMouseButton(minecraft.getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_MIDDLE) != 0
+				&& (!hoveredSlot.getItem().isEmpty() == menu.getCarried().isEmpty()))
 			return false;
-		InventorySorter sorter = new InventorySorter(screenHelper.get(), (HandledScreen<?>) (Object) this, focusedSlot);
+		InventorySorter sorter = new InventorySorter(screenHelper.get(), (AbstractContainerScreen<?>) (Object) this, hoveredSlot);
 		SortMode sortMode;
 		if (hasShiftDown()) {
 			sortMode = MWConfig.sort.shiftSort;

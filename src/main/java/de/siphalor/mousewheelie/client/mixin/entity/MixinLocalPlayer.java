@@ -19,22 +19,22 @@ package de.siphalor.mousewheelie.client.mixin.entity;
 
 import com.mojang.authlib.GameProfile;
 import de.siphalor.mousewheelie.client.network.InteractionManager;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayerEntity.class)
-public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
-	public MixinClientPlayerEntity(ClientWorld world, GameProfile profile) {
+@Mixin(LocalPlayer.class)
+public abstract class MixinLocalPlayer extends AbstractClientPlayer {
+	public MixinLocalPlayer(ClientLevel world, GameProfile profile) {
 		super(world, profile);
 	}
 
-	@Inject(method = "closeScreen", at = @At("HEAD"))
-	public void onScreenClosed(CallbackInfo callbackInfo) {
+	@Inject(method = "clientSideCloseContainer", at = @At("HEAD"))
+	public void onContainerClosed(CallbackInfo callbackInfo) {
 		InteractionManager.clear();
 	}
 }

@@ -23,17 +23,17 @@ import de.siphalor.mousewheelie.client.network.InteractionManager;
 import de.siphalor.mousewheelie.client.util.inject.ISlot;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("WeakerAccess")
-public class ContainerScreenHelper<T extends HandledScreen<?>> {
+public class ContainerScreenHelper<T extends AbstractContainerScreen<?>> {
 	protected final T screen;
 	protected final ClickEventFactory clickEventFactory;
 	public static final int INVALID_SCOPE = Integer.MAX_VALUE;
@@ -44,14 +44,14 @@ public class ContainerScreenHelper<T extends HandledScreen<?>> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends HandledScreen<?>> ContainerScreenHelper<T> of(T screen, ClickEventFactory clickEventFactory) {
-		if (screen instanceof CreativeInventoryScreen) {
-			return (ContainerScreenHelper<T>) new CreativeContainerScreenHelper<>((CreativeInventoryScreen) screen, clickEventFactory);
+	public static <T extends AbstractContainerScreen<?>> ContainerScreenHelper<T> of(T screen, ClickEventFactory clickEventFactory) {
+		if (screen instanceof CreativeModeInventoryScreen) {
+			return (ContainerScreenHelper<T>) new CreativeContainerScreenHelper<>((CreativeModeInventoryScreen) screen, clickEventFactory);
 		}
 		return new ContainerScreenHelper<>(screen, clickEventFactory);
 	}
 
-	public InteractionManager.InteractionEvent createClickEvent(Slot slot, int action, SlotActionType actionType) {
+	public InteractionManager.InteractionEvent createClickEvent(Slot slot, int action, ClickType actionType) {
 		return clickEventFactory.create(slot, action, actionType);
 	}
 
@@ -64,11 +64,11 @@ public class ContainerScreenHelper<T extends HandledScreen<?>> {
 	}
 
 	public int getScope(Slot slot, boolean preferSmallerScopes) {
-		if (slot.inventory == null || ((ISlot) slot).mouseWheelie_getIndexInInv() >= slot.inventory.size() || !slot.canInsert(ItemStack.EMPTY)) {
+		if (slot.container == null || ((ISlot) slot).mouseWheelie_getIndexInInv() >= slot.container.getContainerSize() || !slot.mayPlace(ItemStack.EMPTY)) {
 			return INVALID_SCOPE;
 		}
-		if (screen instanceof AbstractInventoryScreen) {
-			if (slot.inventory instanceof PlayerInventory) {
+		if (screen instanceof EffectRenderingInventoryScreen) {
+			if (slot.container instanceof Inventory) {
 				if (isHotbarSlot(slot)) {
 					return 0;
 				} else if (((ISlot) slot).mouseWheelie_getIndexInInv() >= 40) {
@@ -80,7 +80,7 @@ public class ContainerScreenHelper<T extends HandledScreen<?>> {
 				return 2;
 			}
 		} else {
-			if (slot.inventory instanceof PlayerInventory) {
+			if (slot.container instanceof Inventory) {
 				if (isHotbarSlot(slot)) {
 					if (MWConfig.general.hotbarScoping == MWConfig.General.HotbarScoping.HARD
 							|| MWConfig.general.hotbarScoping == MWConfig.General.HotbarScoping.SOFT && preferSmallerScopes) {

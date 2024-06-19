@@ -3,13 +3,13 @@
 	"package": "de.siphalor.mousewheelie.client.mixin",
 	"compatibilityLevel": "JAVA_16",
 	"mixins": [
-		"KeyBindingAccessor"
+		"KeyMappingAccessor"
 	],
 	"client": [
-		"MixinClientPlayNetworkHandler",
+		"MixinClientPacketListener",
 		"MixinCreativeSlot",
 		"MixinSlot",
-		"entity.MixinClientPlayerEntity",
+      "entity.MixinLocalPlayer",
 		"gui.screen.MixinAbstractContainerScreen"
 	],
 	"injectors": {

@@ -21,9 +21,8 @@ import com.mojang.logging.LogUtils;
 import lombok.CustomLog;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.slot.SlotActionType;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.inventory.ClickType;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Queue;
@@ -95,7 +94,7 @@ public class InteractionManager {
 	private static void runOnMainThread(InteractionEvent event) {
 		Waiter blockingWaiter = tt -> false;
 		waiter = blockingWaiter;
-		MinecraftClient.getInstance().execute(() -> {
+		Minecraft.getInstance().execute(() -> {
 			synchronized (interactionEventQueue) {
 				if (waiter == blockingWaiter) {
 					waiter = event.send();
@@ -171,13 +170,13 @@ public class InteractionManager {
 		private final int containerSyncId;
 		private final int slotId;
 		private final int buttonId;
-		private final SlotActionType slotAction;
+		private final ClickType slotAction;
 
-		public ClickEvent(int containerSyncId, int slotId, int buttonId, SlotActionType slotAction) {
+		public ClickEvent(int containerSyncId, int slotId, int buttonId, ClickType slotAction) {
 			this(containerSyncId, slotId, buttonId, slotAction, TICK_WAITER);
 		}
 
-		public ClickEvent(int containerSyncId, int slotId, int buttonId, SlotActionType slotAction, Waiter waiter) {
+		public ClickEvent(int containerSyncId, int slotId, int buttonId, ClickType slotAction, Waiter waiter) {
 			this.containerSyncId = containerSyncId;
 			this.slotId = slotId;
 			this.buttonId = buttonId;
@@ -187,7 +186,7 @@ public class InteractionManager {
 
 		@Override
 		public Waiter send() {
-			MinecraftClient.getInstance().interactionManager.clickSlot(containerSyncId, slotId, buttonId, slotAction, MinecraftClient.getInstance().player);
+			Minecraft.getInstance().gameMode.handleInventoryMouseClick(containerSyncId, slotId, buttonId, slotAction, Minecraft.getInstance().player);
 			return waiter;
 		}
 

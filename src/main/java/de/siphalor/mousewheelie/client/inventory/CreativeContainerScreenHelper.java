@@ -20,22 +20,22 @@ package de.siphalor.mousewheelie.client.inventory;
 import de.siphalor.mousewheelie.client.network.ClickEventFactory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 @Environment(EnvType.CLIENT)
-public class CreativeContainerScreenHelper<T extends CreativeInventoryScreen> extends ContainerScreenHelper<T> {
+public class CreativeContainerScreenHelper<T extends CreativeModeInventoryScreen> extends ContainerScreenHelper<T> {
 	public CreativeContainerScreenHelper(T screen, ClickEventFactory clickEventFactory) {
 		super(screen, clickEventFactory);
 	}
 
 	@Override
 	public int getScope(Slot slot, boolean preferSmallerScopes) {
-		if (screen.isInventoryTabSelected()) {
+		if (screen.isInventoryOpen()) {
 			return super.getScope(slot, preferSmallerScopes);
 		}
-		if (slot.inventory instanceof PlayerInventory) {
+		if (slot.container instanceof Inventory) {
 			if (isHotbarSlot(slot)) {
 				return 0;
 			}

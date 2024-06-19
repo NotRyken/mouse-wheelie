@@ -17,14 +17,13 @@
 
 package de.siphalor.mousewheelie.client.util;
 
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.DyeableItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-
 import java.awt.*;
 import java.util.Iterator;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 public class ItemStackUtils {
 	public static int compareEqualItems(ItemStack a, ItemStack b) {
@@ -38,13 +37,13 @@ public class ItemStackUtils {
 
 	private static int compareEqualItems2(ItemStack a, ItemStack b) {
 		// compare names
-		if (a.hasCustomName()) {
-			if (!b.hasCustomName()) {
+		if (a.hasCustomHoverName()) {
+			if (!b.hasCustomHoverName()) {
 				return -1;
 			}
 			return compareEqualItems3(a, b);
 		}
-		if (b.hasCustomName()) {
+		if (b.hasCustomHoverName()) {
 			return 1;
 		}
 		return compareEqualItems3(a, b);
@@ -52,8 +51,8 @@ public class ItemStackUtils {
 
 	private static int compareEqualItems3(ItemStack a, ItemStack b) {
 		// compare tooltips
-		Iterator<Text> tooltipsA = a.getTooltip(null, TooltipContext.Default.BASIC).iterator();
-		Iterator<Text> tooltipsB = b.getTooltip(null, TooltipContext.Default.BASIC).iterator();
+		Iterator<Component> tooltipsA = a.getTooltipLines(null, TooltipFlag.Default.NORMAL).iterator();
+		Iterator<Component> tooltipsB = b.getTooltipLines(null, TooltipFlag.Default.NORMAL).iterator();
 
 		while (tooltipsA.hasNext()) {
 			if (!tooltipsB.hasNext()) {
@@ -74,9 +73,9 @@ public class ItemStackUtils {
 	private static int compareEqualItems4(ItemStack a, ItemStack b) {
 		// compare special item properties
 		Item item = a.getItem();
-		if (item instanceof DyeableItem) {
-			int colorA = ((DyeableItem) item).getColor(a);
-			int colorB = ((DyeableItem) item).getColor(b);
+		if (item instanceof DyeableLeatherItem) {
+			int colorA = ((DyeableLeatherItem) item).getColor(a);
+			int colorB = ((DyeableLeatherItem) item).getColor(b);
 			float[] hsbA = Color.RGBtoHSB(colorA >> 16 & 0xFF, colorA >> 8 & 0xFF, colorA & 0xFF, null);
 			float[] hsbB = Color.RGBtoHSB(colorB >> 16 & 0xFF, colorB >> 8 & 0xFF, colorB & 0xFF, null);
 			int cmp = Float.compare(hsbA[0], hsbB[0]);
@@ -97,6 +96,6 @@ public class ItemStackUtils {
 
 	private static int compareEqualItems5(ItemStack a, ItemStack b) {
 		// compare damage
-		return Integer.compare(a.getDamage(), b.getDamage());
+		return Integer.compare(a.getDamageValue(), b.getDamageValue());
 	}
 }
