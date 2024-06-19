@@ -19,7 +19,6 @@ package de.siphalor.mousewheelie.client.mixin.entity;
 
 import com.mojang.authlib.GameProfile;
 import de.siphalor.mousewheelie.MWConfig;
-import de.siphalor.mousewheelie.client.inventory.SlotRefiller;
 import de.siphalor.mousewheelie.client.network.InteractionManager;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -41,19 +40,5 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
 	@Inject(method = "closeScreen", at = @At("HEAD"))
 	public void onScreenClosed(CallbackInfo callbackInfo) {
 		InteractionManager.clear();
-	}
-
-	@Inject(method = "dropSelectedItem", at = @At("HEAD"))
-	public void onDropSelectedItem(boolean all, CallbackInfoReturnable<ItemEntity> callbackInfoReturnable) {
-		if (MWConfig.refill.enable && MWConfig.refill.drop) {
-			if (!getMainHandStack().isEmpty()) {
-				SlotRefiller.scheduleRefillUnchecked(Hand.MAIN_HAND, getInventory(), getMainHandStack().copy());
-			}
-		}
-	}
-
-	@Inject(method = "dropSelectedItem", at = @At("RETURN"))
-	public void onSelectedItemDropped(boolean all, CallbackInfoReturnable<ItemEntity> callbackInfoReturnable) {
-		SlotRefiller.performRefill();
 	}
 }

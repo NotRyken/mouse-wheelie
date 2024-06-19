@@ -20,7 +20,6 @@ package de.siphalor.mousewheelie.client.inventory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import de.siphalor.mousewheelie.MWConfig;
-import de.siphalor.mousewheelie.client.MWClient;
 import de.siphalor.mousewheelie.client.network.ClickEventFactory;
 import de.siphalor.mousewheelie.client.network.InteractionManager;
 import de.siphalor.mousewheelie.client.util.ItemStackUtils;
@@ -131,94 +130,6 @@ public class ContainerScreenHelper<T extends HandledScreen<?>> {
 			unlockSlot(slot);
 			return waiter;
 		}, event.shouldRunOnMainThread());
-	}
-
-	public void scroll(Slot referenceSlot, boolean scrollUp) {
-		// Shall send determines whether items from the referenceSlot shall be moved to another scope. Otherwise the referenceSlot will receive items.
-		boolean shallSend;
-		if (MWConfig.scrolling.directionalScrolling) {
-			shallSend = shallChangeInventory(referenceSlot, scrollUp);
-		} else {
-			shallSend = !scrollUp;
-			scrollUp = false;
-		}
-
-		if (shallSend) {
-			// If deposit modifier and restock modifier are equal, deposit modifier takes precedence
-			if (MWClient.DEPOSIT_MODIFIER.isPressed()) {
-				depositAllFrom(referenceSlot);
-				return;
-			}
-			if (MWClient.RESTOCK_MODIFIER.isPressed()) {
-				restockAll(getComplementaryScope(getScope(referenceSlot)));
-				return;
-			}
-
-			if (!referenceSlot.canInsert(ItemStack.EMPTY)) {
-				sendStack(referenceSlot);
-			}
-			if (MWClient.ALL_OF_KIND_MODIFIER.isPressed()) {
-				sendAllOfAKind(referenceSlot);
-			} else if (MWClient.WHOLE_STACK_MODIFIER.isPressed()) {
-				sendStack(referenceSlot);
-			} else {
-				sendSingleItem(referenceSlot);
-			}
-		} else {
-			// If deposit modifier and restock modifier are equal, restock modifier takes precedence
-			if (MWClient.RESTOCK_MODIFIER.isPressed()) {
-				if (MWClient.WHOLE_STACK_MODIFIER.isPressed()) {
-					restockAll(referenceSlot);
-				} else {
-					restockAllOfAKind(referenceSlot);
-				}
-				return;
-			}
-			if (MWClient.DEPOSIT_MODIFIER.isPressed()) {
-				depositAllFrom(getComplementaryScope(getScope(referenceSlot)));
-				return;
-			}
-
-			ItemStack referenceStack = referenceSlot.getStack().copy();
-			int referenceScope = getScope(referenceSlot);
-			boolean wholeStackModifier = MWClient.WHOLE_STACK_MODIFIER.isPressed();
-			boolean allOfKindModifier = MWClient.ALL_OF_KIND_MODIFIER.isPressed();
-			if (wholeStackModifier || allOfKindModifier) {
-				for (Slot slot : screen.getScreenHandler().slots) {
-					if (getScope(slot) == referenceScope) continue;
-					if (ItemStackUtils.areItemsOfSameKind(slot.getStack(), referenceStack)) {
-						sendStack(slot);
-						if (!allOfKindModifier) {
-							break;
-						}
-					}
-				}
-			} else {
-				Slot moveSlot = null;
-				int stackSize = Integer.MAX_VALUE;
-				for (Slot slot : screen.getScreenHandler().slots) {
-					if (getScope(slot) == referenceScope) continue;
-					if (getScope(slot) <= 0 == scrollUp) {
-						if (ItemStackUtils.areItemsOfSameKind(slot.getStack(), referenceStack)) {
-							if (slot.getStack().getCount() < stackSize) {
-								stackSize = slot.getStack().getCount();
-								moveSlot = slot;
-								if (stackSize == 1) {
-									break;
-								}
-							}
-						}
-					}
-				}
-				if (moveSlot != null) {
-					sendSingleItem(moveSlot);
-				}
-			}
-		}
-	}
-
-	public boolean shallChangeInventory(Slot slot, boolean scrollUp) {
-		return (getScope(slot) <= 0) == scrollUp;
 	}
 
 	public boolean isHotbarSlot(Slot slot) {

@@ -31,11 +31,7 @@
 				"value": "de.siphalor.mousewheelie.client.MWClient"
 			}
 		],
-		"main": [
-			{
-				"value": "de.siphalor.mousewheelie.MouseWheelie"
-			}
-		],
+		"main": [],
 		"tweed4:config": [
 			{
 				"value": "de.siphalor.mousewheelie.MWConfig"

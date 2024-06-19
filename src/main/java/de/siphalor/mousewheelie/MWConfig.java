@@ -49,24 +49,12 @@ public class MWConfig {
 		)
 		public int integratedInteractionRate = 1;
 
-		@AConfigEntry(environment = ConfigEnvironment.UNIVERSAL)
-		public boolean enableQuickArmorSwapping = true;
-
-		public boolean enableDropModifier = true;
-
-		public boolean enableQuickCraft = true;
-
 		@AConfigEntry(comment = "Whether item types should check nbt data.\nThis is for example used by scrolling and drop-clicking.\nNONE disables this, ALL checks for exactly the same nbt and SOME allows for differences in damage and enchantments.")
 		public ItemStackUtils.NbtMatchMode itemKindsNbtMatchMode = ItemStackUtils.NbtMatchMode.SOME;
 
 		public enum HotbarScoping {HARD, SOFT, NONE}
 
 		public HotbarScoping hotbarScoping = HotbarScoping.SOFT;
-
-		public boolean betterFastDragging = false;
-
-		@AConfigEntry(comment = "Enables dragging bundles while holding right-click to pick up or put out multiple stacks in a single swipe.")
-		public boolean enableBundleDragging = true;
 
 		@AConfigListener("interaction-rate")
 		public void onReloadInteractionRate() {
@@ -81,17 +69,6 @@ public class MWConfig {
 				InteractionManager.setTickRate(integratedInteractionRate);
 			}
 		}
-	}
-
-	public static Scrolling scrolling = new Scrolling();
-
-	@AConfigBackground("textures/block/dark_prismarine.png")
-	public static class Scrolling {
-		public boolean enable = true;
-		public boolean invert = false;
-		public boolean directionalScrolling = true;
-		public boolean scrollCreativeMenuItems = true;
-		public boolean scrollCreativeMenuTabs = true;
 	}
 
 	public static Sort sort = new Sort();
@@ -112,74 +89,11 @@ public class MWConfig {
 		}
 	}
 
-	public static Refill refill = new Refill();
-
-	@AConfigBackground("textures/block/horn_coral_block.png")
-	public static class Refill {
-		public boolean enable = true;
-
-		public boolean playSound = true;
-
-		public boolean offHand = true;
-		public boolean restoreSelectedSlot = false;
-
-		public boolean itemChanges = true;
-
-		public boolean eat = true;
-		public boolean drop = true;
-		public boolean use = true;
-		public boolean other = true;
-
-		public Rules rules = new Rules();
-
-		@AConfigBackground("textures/block/yellow_terracotta.png")
-		public static class Rules {
-			public boolean anyBlock = false;
-			public boolean itemgroup = false;
-			public boolean itemHierarchy = false;
-			public boolean blockHierarchy = false;
-			public boolean food = false;
-			public boolean equalItems = true;
-			public boolean equalStacks = true;
-		}
-	}
-
-	public static ToolPicking toolPicking = new ToolPicking();
-
-	@AConfigBackground("textures/block/coarse_dirt.png")
-	public static class ToolPicking {
-		public boolean holdTool = true;
-		public boolean holdBlock = false;
-		public boolean pickFromInventory = true;
-	}
-
 	@AConfigFixer
 	public <V extends DataValue<V, L, O>, L extends DataList<V, L, O>, O extends DataObject<V, L, O>>
 	void fixConfig(O dataObject, O rootObject) {
 		if (dataObject.has("general") && dataObject.get("general").isObject()) {
 			O general = dataObject.get("general").asObject();
-
-			moveConfigEntry(dataObject, general, "enable-item-scrolling", "scrolling");
-			moveConfigEntry(dataObject, general, "scroll-factor", "scrolling");
-			moveConfigEntry(dataObject, general, "directional-scrolling", "scrolling");
-
-			if (dataObject.has("scrolling") && dataObject.get("scrolling").isObject()) {
-				O scrolling = dataObject.get("scrolling").asObject();
-
-				if (scrolling.has("scroll-creative-menu") && scrolling.get("scroll-creative-menu").isBoolean()) {
-					scrolling.set("scroll-creative-menu-items", !scrolling.get("scroll-creative-menu").asBoolean());
-					scrolling.remove("scroll-creative-menu");
-				}
-				if (scrolling.has("scroll-factor") && scrolling.get("scroll-factor").isNumber()) {
-					scrolling.set("invert", scrolling.get("scroll-factor").asFloat() < 0);
-					scrolling.remove("scroll-factor");
-				}
-			}
-
-			moveConfigEntry(dataObject, general, "hold-tool-pick", "tool-picking", "hold-tool");
-			moveConfigEntry(dataObject, general, "hold-block-tool-pick", "tool-picking", "hold-block");
-
-			moveConfigEntry(dataObject, general, "enable-alt-dropping", "general", "enable-drop-modifier");
 
 			general.remove("hotbar-scope");
 		}

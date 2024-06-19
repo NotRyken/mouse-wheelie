@@ -17,12 +17,9 @@
 
 package de.siphalor.mousewheelie.client.inventory.sort;
 
-import de.siphalor.mousewheelie.MWConfig;
 import de.siphalor.mousewheelie.client.inventory.ContainerScreenHelper;
 import de.siphalor.mousewheelie.client.network.InteractionManager;
-import de.siphalor.mousewheelie.client.network.MWClientNetworking;
 import de.siphalor.mousewheelie.client.util.inject.ISlot;
-import de.siphalor.mousewheelie.common.network.ReorderInventoryPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -138,25 +135,7 @@ public class InventorySorter {
 
 		sortIds = sortMode.sort(sortIds, stacks, new SortContext(containerScreen, Arrays.asList(inventorySlots)));
 
-		if (MWConfig.sort.serverAcceleratedSorting && MWClientNetworking.canSendReorderPacket()) {
-			this.reorderInventory(sortIds);
-		} else {
-			this.sortOnClient(sortIds);
-		}
-	}
-
-	protected void reorderInventory(int[] sortedIds) {
-		int[] slotMappings = new int[sortedIds.length * 2];
-		for (int i = 0; i < sortedIds.length; i++) {
-			Slot from = inventorySlots[sortedIds[i]];
-			Slot to = inventorySlots[i];
-			slotMappings[i * 2] = ((ISlot) from).mouseWheelie_getIdInContainer();
-			slotMappings[i * 2 + 1] = ((ISlot) to).mouseWheelie_getIdInContainer();
-		}
-		InteractionManager.push(() -> {
-			MWClientNetworking.send(new ReorderInventoryPacket(containerScreen.getScreenHandler().syncId, slotMappings));
-			return InteractionManager.TICK_WAITER;
-		});
+		this.sortOnClient(sortIds);
 	}
 
 	protected void sortOnClient(int[] sortedIds) {

@@ -17,6 +17,7 @@
 
 package de.siphalor.mousewheelie.client.network;
 
+import com.mojang.logging.LogUtils;
 import de.siphalor.mousewheelie.client.MWClient;
 import lombok.CustomLog;
 import net.fabricmc.api.EnvType;
@@ -45,19 +46,10 @@ public class InteractionManager {
 	private static ScheduledFuture<?> tickFuture;
 
 
-	public static final Waiter DUMMY_WAITER = (TriggerType triggerType) -> true;
 	public static final Waiter TICK_WAITER = (TriggerType triggerType) -> triggerType == TriggerType.TICK;
 
-	public static final PacketEvent SWAP_WITH_OFFHAND_EVENT = new PacketEvent(
-			new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN),
-			triggerType -> triggerType == InteractionManager.TriggerType.CONTAINER_SLOT_UPDATE && MWClient.lastUpdatedSlot == 45
-	);
 
 	private static Waiter waiter = null;
-
-	public static void delay(Runnable action, Duration duration) {
-		scheduledExecutor.schedule(action, duration.toMillis(), TimeUnit.MILLISECONDS);
-	}
 
 
 	public static void push(InteractionEvent interactionEvent) {
@@ -80,10 +72,6 @@ public class InteractionManager {
 			if (waiter == null)
 				triggerSend(TriggerType.INITIAL);
 		}
-	}
-
-	public static void pushClickEvent(int containerSyncId, int slotId, int buttonId, SlotActionType slotAction) {
-		push(new ClickEvent(containerSyncId, slotId, buttonId, slotAction));
 	}
 
 	public static void triggerSend(TriggerType triggerType) {
@@ -133,13 +121,7 @@ public class InteractionManager {
 		try {
 			triggerSend(TriggerType.TICK);
 		} catch (Exception e) {
-			log.error("Error while ticking InteractionManager", e);
-		}
-	}
-
-	public static void setWaiter(Waiter waiter) {
-		synchronized (interactionEventQueue) {
-			InteractionManager.waiter = waiter;
+			LogUtils.getLogger().error("Error while ticking InteractionManager", e);
 		}
 	}
 
@@ -147,12 +129,6 @@ public class InteractionManager {
 		synchronized (interactionEventQueue) {
 			interactionEventQueue.clear();
 			waiter = null;
-		}
-	}
-
-	public static boolean isReady() {
-		synchronized (interactionEventQueue) {
-			return waiter == null && interactionEventQueue.isEmpty();
 		}
 	}
 
@@ -244,10 +220,6 @@ public class InteractionManager {
 		private final Supplier<Waiter> callback;
 		private final boolean shouldRunOnMainThread;
 
-		public CallbackEvent(Supplier<Waiter> callback) {
-			this(callback, false);
-		}
-
 		public CallbackEvent(Supplier<Waiter> callback, boolean shouldRunOnMainThread) {
 			this.callback = callback;
 			this.shouldRunOnMainThread = shouldRunOnMainThread;
@@ -261,30 +233,6 @@ public class InteractionManager {
 		@Override
 		public boolean shouldRunOnMainThread() {
 			return shouldRunOnMainThread;
-		}
-	}
-
-	public static class PacketEvent implements InteractionEvent {
-		private final Packet<?> packet;
-		private final Waiter waiter;
-
-		public PacketEvent(Packet<?> packet) {
-			this(packet, DUMMY_WAITER);
-		}
-
-		public PacketEvent(Packet<?> packet, int triggers) {
-			this(packet, new SlotUpdateWaiter(triggers));
-		}
-
-		public PacketEvent(Packet<?> packet, Waiter waiter) {
-			this.packet = packet;
-			this.waiter = waiter;
-		}
-
-		@Override
-		public Waiter send() {
-			MinecraftClient.getInstance().getNetworkHandler().sendPacket(packet);
-			return waiter;
 		}
 	}
 }

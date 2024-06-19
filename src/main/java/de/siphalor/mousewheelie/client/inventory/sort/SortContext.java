@@ -40,4 +40,9 @@ public class SortContext {
 	 * These slots are usually in the same scope (see {@link de.siphalor.mousewheelie.client.inventory.ContainerScreenHelper#getScope(Slot)}).
 	 */
 	List<Slot> relevantSlots;
+
+	public <T> SortContext(HandledScreen<?> containerScreen, List<Slot> list) {
+		this.screen = containerScreen;
+		this.relevantSlots = list;
+	}
 }
